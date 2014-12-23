@@ -5,14 +5,27 @@ import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Button;
+import android.widget.ProgressBar;
+import android.widget.RadioButton;
+import android.widget.RadioGroup;
 import android.widget.TextView;
+
+import java.util.concurrent.ExecutionException;
 
 public class LearningActivity extends FragmentActivity {
 
-    private TextView knowledgeAdvert = null;
+    private TextView knAdvert = null;
+    private ProgressBar pathProgress = null;
+
+    private TextView knTitle = null;
+    private TextView knContent = null;
+    private RadioGroup ansGroup= null;
+    private RadioButton[] options = null;
+
     private Button getNextTask = null;
 
     private Knowledge k = null;
@@ -27,8 +40,9 @@ public class LearningActivity extends FragmentActivity {
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
 
+        // Set the view
         setContentView(R.layout.activity_learning);
-
+        bindViewsToVariables();
     }
 
 
@@ -51,6 +65,52 @@ public class LearningActivity extends FragmentActivity {
         return super.onOptionsItemSelected(item);
     }
 
+    public void bindViewsToVariables() {
+        knAdvert = (TextView) findViewById(R.id.knowledgeAdvert);
+        pathProgress = (ProgressBar) findViewById(R.id.pathProgress);
 
+        knTitle = (TextView) findViewById(R.id.knowledgeTitle);
+        knContent = (TextView) findViewById(R.id.knowledgeContent);
 
+        ansGroup = (RadioGroup) findViewById(R.id.ansGroup);
+
+        options = new RadioButton[7];
+
+        options[0] = (RadioButton) findViewById(R.id.option_a);
+        options[1] = (RadioButton) findViewById(R.id.option_b);
+        options[2] = (RadioButton) findViewById(R.id.option_c);
+        options[3] = (RadioButton) findViewById(R.id.option_d);
+        options[4] = (RadioButton) findViewById(R.id.option_e);
+        options[5] = (RadioButton) findViewById(R.id.option_f);
+        options[6] = (RadioButton) findViewById(R.id.option_g);
+
+        getNextTask = (Button) findViewById(R.id.getNextTask);
+    }
+
+    public void setOnClickListeners() {
+        getNextTask.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                try {
+                    k = new GetKnowledge().execute().get();
+                    updateViews();
+                }
+                catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                catch (ExecutionException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+    }
+
+    public void updateViews() {
+        if(k.getKnowledgeType().equals(KnowledgeTypes.KNOWLEDGE_TYPE_UNIT) ) {
+
+        }
+        else if(k.getKnowledgeType().equals(KnowledgeTypes.KNOWLEDGE_TYPE_QUESTION)) {
+
+        }
+    }
 }

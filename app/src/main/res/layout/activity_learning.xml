@@ -36,7 +36,7 @@
         style="?android:attr/progressBarStyleHorizontal"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:id="@+id/progressBar2"
+        android:id="@+id/pathProgress"
         android:layout_below="@+id/knowledgeAdvert"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
@@ -49,7 +49,7 @@
         android:textAppearance="?android:attr/textAppearanceLarge"
         android:text="Large Text"
         android:id="@+id/knowledgeTitle"
-        android:layout_below="@+id/progressBar2"
+        android:layout_below="@+id/pathProgress"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
         android:textStyle="bold" />
@@ -63,15 +63,17 @@
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
         android:layout_marginLeft="23dp"
-        android:layout_alignRight="@+id/progressBar2"
-        android:layout_alignEnd="@+id/progressBar2" />
+        android:layout_alignRight="@+id/pathProgress"
+        android:layout_alignEnd="@+id/pathProgress" />
 
     <RadioGroup
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
         android:layout_centerHorizontal="true"
         android:layout_above="@+id/getNextTask"
-        android:layout_below="@+id/knowledgeContent">
+        android:layout_below="@+id/knowledgeContent"
+        android:id="@+id/ansGroup"
+        android:baselineAligned="true">
 
         <RadioButton
             android:layout_width="wrap_content"
@@ -98,28 +100,28 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="New RadioButton"
-            android:id="@+id/radioButton4"
+            android:id="@+id/option_d"
             android:layout_gravity="center_horizontal" />
 
         <RadioButton
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="New RadioButton"
-            android:id="@+id/radioButton5"
+            android:id="@+id/option_e"
             android:layout_gravity="center_horizontal" />
 
         <RadioButton
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="New RadioButton"
-            android:id="@+id/radioButton6"
+            android:id="@+id/option_f"
             android:layout_gravity="center_horizontal" />
 
         <RadioButton
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="New RadioButton"
-            android:id="@+id/radioButton7"
+            android:id="@+id/option_g"
             android:layout_gravity="center_horizontal" />
     </RadioGroup>
 

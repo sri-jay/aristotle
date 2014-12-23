@@ -7,4 +7,7 @@ public interface Knowledge {
     public String getUniqueHash();
     public String getKnowledgeType();
     public String getPathProgress();
+
+    public String getKnowledgeTitle();
+    public Object getKnowledgeContent();
 }

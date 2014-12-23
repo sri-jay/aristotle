@@ -30,8 +30,18 @@ public class QuestionUnit extends KnowledgeTypes implements Knowledge {
     }
 
     @Override
-    public  String getPathProgress() {
+    public String getPathProgress() {
         return pathProgress;
+    }
+
+    @Override
+    public String getKnowledgeTitle() {
+        return getQuestionStatement();
+    }
+
+    @Override
+    public String[] getKnowledgeContent() {
+        return getAnswerOptions();
     }
 
     public String getQuestionStatement() {
