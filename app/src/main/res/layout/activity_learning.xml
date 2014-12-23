@@ -29,8 +29,10 @@
         android:layout_alignParentTop="true"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
-        android:phoneNumber="true"
-        android:textColor="#ffffffff" />
+        android:phoneNumber="false"
+        android:textColor="#ffffffff"
+        android:textSize="30dp"
+        android:textIsSelectable="false" />
 
     <ProgressBar
         style="?android:attr/progressBarStyleHorizontal"
@@ -52,7 +54,8 @@
         android:layout_below="@+id/pathProgress"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
-        android:textStyle="bold" />
+        android:textStyle="bold"
+        android:textSize="30dp" />
 
     <TextView
         android:layout_width="wrap_content"
@@ -64,63 +67,64 @@
         android:layout_alignParentStart="true"
         android:layout_marginLeft="23dp"
         android:layout_alignRight="@+id/pathProgress"
-        android:layout_alignEnd="@+id/pathProgress" />
+        android:layout_alignEnd="@+id/pathProgress"
+        android:textSize="25dp" />
 
     <RadioGroup
         android:layout_width="fill_parent"
-        android:layout_height="fill_parent"
-        android:layout_centerHorizontal="true"
-        android:layout_above="@+id/getNextTask"
-        android:layout_below="@+id/knowledgeContent"
+        android:layout_height="wrap_content"
         android:id="@+id/ansGroup"
-        android:baselineAligned="true">
+        android:baselineAligned="true"
+        android:layout_above="@+id/getNextTask"
+        android:layout_centerHorizontal="true"
+        android:textAlignment="textStart">
 
         <RadioButton
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="New RadioButton"
+            android:text="Only A"
             android:id="@+id/option_a"
             android:layout_gravity="center_horizontal" />
 
         <RadioButton
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="New RadioButton"
+            android:text="Only B"
             android:id="@+id/option_b"
             android:layout_gravity="center_horizontal" />
 
         <RadioButton
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="New RadioButton"
+            android:text="Only C"
             android:id="@+id/option_c"
             android:layout_gravity="center_horizontal" />
 
         <RadioButton
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="New RadioButton"
+            android:text="Not A"
             android:id="@+id/option_d"
             android:layout_gravity="center_horizontal" />
 
         <RadioButton
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="New RadioButton"
+            android:text="Not B"
             android:id="@+id/option_e"
             android:layout_gravity="center_horizontal" />
 
         <RadioButton
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="New RadioButton"
+            android:text="Not C"
             android:id="@+id/option_f"
             android:layout_gravity="center_horizontal" />
 
         <RadioButton
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="New RadioButton"
+            android:text="Seems hard!, I'll try this later!"
             android:id="@+id/option_g"
             android:layout_gravity="center_horizontal" />
     </RadioGroup>

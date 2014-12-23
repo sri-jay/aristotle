@@ -26,7 +26,7 @@ public class QuestionUnit extends KnowledgeTypes implements Knowledge {
 
     @Override
     public String getKnowledgeType() {
-        return KNOWLEDGE_TYPE_UNIT;
+        return KNOWLEDGE_TYPE_QUESTION;
     }
 
     @Override

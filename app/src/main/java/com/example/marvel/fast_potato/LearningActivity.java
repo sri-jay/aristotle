@@ -1,8 +1,10 @@
 package com.example.marvel.fast_potato;
 
 import android.app.FragmentTransaction;
+import android.graphics.Typeface;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -17,6 +19,8 @@ import android.widget.TextView;
 import java.util.concurrent.ExecutionException;
 
 public class LearningActivity extends FragmentActivity {
+
+    private Typeface tf = null;
 
     private TextView knAdvert = null;
     private ProgressBar pathProgress = null;
@@ -43,6 +47,12 @@ public class LearningActivity extends FragmentActivity {
         // Set the view
         setContentView(R.layout.activity_learning);
         bindViewsToVariables();
+        setOnClickListeners();
+        init();
+
+        // Set styles
+        tf = Typeface.createFromAsset(getAssets(), "fonts/Pacifico.ttf");
+        knAdvert.setTypeface(tf);
     }
 
 
@@ -94,6 +104,7 @@ public class LearningActivity extends FragmentActivity {
                 try {
                     k = new GetKnowledge().execute().get();
                     updateViews();
+                    pathProgress.setProgress(Integer.parseInt(k.getPathProgress()));
                 }
                 catch (InterruptedException e) {
                     e.printStackTrace();
@@ -105,12 +116,49 @@ public class LearningActivity extends FragmentActivity {
         });
     }
 
+    public void init() {
+        try {
+            k = new GetKnowledge().execute().get();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+        }
+        updateViews();
+    }
     public void updateViews() {
         if(k.getKnowledgeType().equals(KnowledgeTypes.KNOWLEDGE_TYPE_UNIT) ) {
-
+            Log.d("updateViews() -> 1", k.getKnowledgeTitle());
+            setUnitView();
         }
         else if(k.getKnowledgeType().equals(KnowledgeTypes.KNOWLEDGE_TYPE_QUESTION)) {
-
+            Log.d("updateViews() -> 2", k.getKnowledgeTitle());
+            setQuestionView();
         }
+    }
+
+    public void setQuestionView() {
+        ansGroup.setVisibility(View.VISIBLE);
+        String questionTitle = k.getKnowledgeTitle();
+        Log.d("setQuestionView()", k.getKnowledgeTitle());
+        String[] questionOptions = (String[]) k.getKnowledgeContent();
+
+        knAdvert.setText("Pop Quiz! Hash : "+k.getUniqueHash().substring(0,10));
+        knTitle.setText(questionTitle);
+
+        StringBuilder sb = new StringBuilder();
+        sb.append("Option A : ").append(questionOptions[0]).append("\n\nOption B : ").append(questionOptions[1]).append("\n\nOption C : ").append(questionOptions[2]);
+
+        knContent.setText(sb.toString());
+    }
+
+    public void setUnitView() {
+        ansGroup.setVisibility(View.GONE);
+        String unitTitle = k.getKnowledgeTitle();
+        String unitKnowledge = (String) k.getKnowledgeContent();
+
+        knAdvert.setText("Here is a small topic! Hash : "+k.getUniqueHash());
+        knTitle.setText(unitTitle);
+        knContent.setText(unitKnowledge);
     }
 }

@@ -30,7 +30,14 @@ public class KnowledgeUnit extends KnowledgeTypes implements Knowledge {
     public  String getPathProgress() {
         return pathProgress;
     }
-    public String getKnowledge() {
+
+    @Override
+    public String getKnowledgeTitle() {
+        return knowledgeTitle;
+    }
+
+    @Override
+    public Object getKnowledgeContent() {
         return knowledgeContent;
     }
 }
