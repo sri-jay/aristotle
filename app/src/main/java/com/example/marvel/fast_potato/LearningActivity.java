@@ -1,9 +1,9 @@
 package com.example.marvel.fast_potato;
 
-import android.app.FragmentTransaction;
+import android.app.Activity;
 import android.graphics.Typeface;
 import android.os.Bundle;
-import android.support.v4.app.FragmentActivity;
+import android.text.method.ScrollingMovementMethod;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -15,10 +15,14 @@ import android.widget.ProgressBar;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.util.concurrent.ExecutionException;
 
-public class LearningActivity extends FragmentActivity {
+public class LearningActivity extends Activity {
+
+    private final static boolean QUIZ_MODE = true;
+    private final static boolean UNIT_MODE = false;
 
     private Typeface tf = null;
 
@@ -34,7 +38,7 @@ public class LearningActivity extends FragmentActivity {
 
     private Knowledge k = null;
 
-    FragmentTransaction fragmentLoader = null;
+    private boolean activityMode;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -81,6 +85,7 @@ public class LearningActivity extends FragmentActivity {
 
         knTitle = (TextView) findViewById(R.id.knowledgeTitle);
         knContent = (TextView) findViewById(R.id.knowledgeContent);
+        knContent.setMovementMethod(new ScrollingMovementMethod());
 
         ansGroup = (RadioGroup) findViewById(R.id.ansGroup);
 
@@ -102,9 +107,21 @@ public class LearningActivity extends FragmentActivity {
             @Override
             public void onClick(View view) {
                 try {
+
+                    int choice = ansGroup.getCheckedRadioButtonId();
+                    if(choice == -1 && (activityMode == QUIZ_MODE)) {
+                        Toast.makeText(getApplicationContext(), "Select a choice please!", Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+
                     k = new GetKnowledge().execute().get();
                     updateViews();
                     pathProgress.setProgress(Integer.parseInt(k.getPathProgress()));
+
+                    if(k.getKnowledgeType().equals(KnowledgeTypes.KNOWLEDGE_TYPE_QUESTION))
+                        activityMode = QUIZ_MODE;
+                    else if(k.getKnowledgeType().equals(KnowledgeTypes.KNOWLEDGE_TYPE_UNIT))
+                        activityMode = UNIT_MODE;
                 }
                 catch (InterruptedException e) {
                     e.printStackTrace();
@@ -119,6 +136,10 @@ public class LearningActivity extends FragmentActivity {
     public void init() {
         try {
             k = new GetKnowledge().execute().get();
+            if(k.getKnowledgeType().equals(KnowledgeTypes.KNOWLEDGE_TYPE_QUESTION))
+                activityMode = QUIZ_MODE;
+            else if(k.getKnowledgeType().equals(KnowledgeTypes.KNOWLEDGE_TYPE_UNIT))
+                activityMode = UNIT_MODE;
         } catch (InterruptedException e) {
             e.printStackTrace();
         } catch (ExecutionException e) {
@@ -128,11 +149,9 @@ public class LearningActivity extends FragmentActivity {
     }
     public void updateViews() {
         if(k.getKnowledgeType().equals(KnowledgeTypes.KNOWLEDGE_TYPE_UNIT) ) {
-            Log.d("updateViews() -> 1", k.getKnowledgeTitle());
             setUnitView();
         }
         else if(k.getKnowledgeType().equals(KnowledgeTypes.KNOWLEDGE_TYPE_QUESTION)) {
-            Log.d("updateViews() -> 2", k.getKnowledgeTitle());
             setQuestionView();
         }
     }
@@ -157,8 +176,16 @@ public class LearningActivity extends FragmentActivity {
         String unitTitle = k.getKnowledgeTitle();
         String unitKnowledge = (String) k.getKnowledgeContent();
 
-        knAdvert.setText("Here is a small topic! Hash : "+k.getUniqueHash());
+        knAdvert.setText("Here is a small topic! Hash : "+k.getUniqueHash().substring(0,10));
         knTitle.setText(unitTitle);
         knContent.setText(unitKnowledge);
+    }
+
+    public void saveAnswer() {
+        int choice = ansGroup.getCheckedRadioButtonId();
+        if(choice == -1) {
+            Toast.makeText(getApplicationContext(), "Select a choice please!", Toast.LENGTH_SHORT).show();
+            return;
+        }
     }
 }

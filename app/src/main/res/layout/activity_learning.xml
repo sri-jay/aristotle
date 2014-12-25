@@ -55,7 +55,7 @@
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
         android:textStyle="bold"
-        android:textSize="30dp" />
+        android:textSize="25dp" />
 
     <TextView
         android:layout_width="wrap_content"
@@ -68,7 +68,10 @@
         android:layout_marginLeft="23dp"
         android:layout_alignRight="@+id/pathProgress"
         android:layout_alignEnd="@+id/pathProgress"
-        android:textSize="25dp" />
+        android:textSize="20dp"
+        android:scrollbars="vertical"
+        android:layout_above="@+id/ansGroup"
+        android:maxLines="25" />
 
     <RadioGroup
         android:layout_width="fill_parent"
