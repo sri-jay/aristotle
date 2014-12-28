@@ -2,67 +2,61 @@ package com.example.marvel.fast_potato;
 
 import android.app.Activity;
 import android.content.Intent;
-import android.database.sqlite.SQLiteDatabase;
-import android.graphics.Typeface;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.TextView;
-import android.widget.Toast;
+import android.widget.EditText;
+import android.widget.Spinner;
 
-import java.io.File;
-
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ExecutionException;
 
 public class RegisterActivity extends Activity {
 
-    private Typeface tf = null;
-    private TextView registerAdvert = null;
-    private Button homePageAction = null;
+    private Spinner orgSpinner = null;
+    private EditText firstName = null;
+    private EditText lastName = null;
 
+    private Button doRegister = null;
+
+    private Map<String, String> orgData = null;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        // Make fullscreen activity
+        // Creating fullscreen activity
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
 
         setContentView(R.layout.activity_register);
 
-        tf = Typeface.createFromAsset(getAssets(), "fonts/Pacifico.ttf");
+        bindViews();
+        setOnClickListeners();
 
-        registerAdvert = (TextView) findViewById(R.id.register_advert);
-        registerAdvert.setTypeface(tf);
+        try {
+            orgData = new RegisterUserDevice.GetOrganizations().execute().get();
+            List<String> orgNames = new ArrayList<String>();
 
-        homePageAction = (Button) findViewById(R.id.registerButton);
-        Log.d("RegisterActivity : ","Registering device.");
-        homePageAction.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                File database = getApplicationContext().getDatabasePath("eulerApplicationDatabase.db");
-                if(!database.exists()) {
-                    RegisterUserDevice register = new RegisterUserDevice();
-                    try{
-                        String[] response = register.execute().get();
-                        if(response[0].equals(RegisterUserDevice.REGISTER_SUCCESS)){
-                            initialUserInteraction();
-                        }
-                    }
-                    catch (Exception e) {
-                        e.printStackTrace();
-                        Toast.makeText(getApplicationContext(),"An error occurred", Toast.LENGTH_LONG);
-                    }
-                }
-                else {
-                    openDash();
-                }
+            for(Map.Entry<String, String> ent : orgData.entrySet()) {
+                orgNames.add(ent.getKey());
             }
-        });
+
+            ArrayAdapter<String> spinnerAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, orgNames);
+            orgSpinner.setAdapter(spinnerAdapter);
+        }
+        catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        catch (ExecutionException e) {
+            e.printStackTrace();
+        }
     }
 
 
@@ -85,23 +79,51 @@ public class RegisterActivity extends Activity {
         return super.onOptionsItemSelected(item);
     }
 
-    // This function opens the user dashboard
-    public void openDash() {
-        //Intent intent = new Intent(this, UserDashboardActivity.class);
-        Intent intent = new Intent(this, LearningActivity.class);
-        startActivity(intent);
+    public void bindViews() {
+        orgSpinner = (Spinner) findViewById(R.id.orgSelect);
+        firstName = (EditText) findViewById(R.id.fNameField);
+        lastName = (EditText) findViewById(R.id.lNameField);
+        doRegister = (Button) findViewById(R.id.registerUserButton);
     }
 
-    // This function starts a first time user assessment
-    public void initialUserInteraction() {
-        Intent intent = new Intent(this, UserDashboardActivity.class);
-        startActivity(intent);
-        createDatabase();
-        this.finish();
+    public void setOnClickListeners() {
+        doRegister.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                registerUser();
+            }
+        });
     }
 
-    public void createDatabase() {
-        SQLiteDatabase create = new EulerDB(getApplicationContext()).getWritableDatabase();
-        Log.d("DB", "Created DB");
+    public void registerUser() {
+        try {
+            String fName = firstName.getText().toString();
+            String lName = lastName.getText().toString();
+            String clientId = orgData.get(orgSpinner.getSelectedItem().toString());
+
+            Map<String ,String> regData = new RegisterUserDevice.RegisterDevice().execute(clientId, fName, lName).get();
+
+            if(regData.get("STATUS").equals(RegisterUserDevice.REGISTER_SUCCESS)) {
+                createLocalDatabase(regData.get("API_KEY"), regData.get("USER_ID"), regData.get("CLIENT_ID"));
+                saveUserData(regData.get("FIRST_NAME"), regData.get("LAST_NAME"));
+
+                Intent intent = new Intent(this, UserDashboardActivity.class);
+                startActivity(intent);
+                finish();
+            }
+        }
+        catch (Exception e){
+            e.printStackTrace();
+        }
+    }
+
+    public void createLocalDatabase(String apiKey, String deviceKey, String userOrg) {
+        EulerDB db = new EulerDB(getApplicationContext());
+        db.initAndSaveApiData(apiKey, deviceKey, userOrg);
+    }
+
+    public void saveUserData(String firstName, String lastName) {
+        EulerDB db = new EulerDB(getApplicationContext());
+        db.saveUserData(firstName, lastName);
     }
 }

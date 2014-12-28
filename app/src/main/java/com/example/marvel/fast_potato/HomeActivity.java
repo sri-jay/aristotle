@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Typeface;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -12,19 +13,14 @@ import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.TextView;
 
-import java.util.Map;
+import java.io.File;
 
-public class UserDashboardActivity extends Activity {
 
-    private TextView welcomeMessage = null;
-    private TextView apiKeyView = null;
-    private TextView deviceKeyView  = null;
+public class HomeActivity extends Activity {
 
     private Typeface tf = null;
-    private Button startQuiz = null;
-
-    private Knowledge quiz = null;
-
+    private TextView registerAdvert = null;
+    private Button homePageAction = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -34,14 +30,25 @@ public class UserDashboardActivity extends Activity {
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
 
-        setContentView(R.layout.activity_user_dashboard);
+        setContentView(R.layout.activity_home);
 
-        bindViews();
-        loadViews();
-        startQuiz.setOnClickListener(new View.OnClickListener() {
+        tf = Typeface.createFromAsset(getAssets(), "fonts/Pacifico.ttf");
+
+        registerAdvert = (TextView) findViewById(R.id.register_advert);
+        registerAdvert.setTypeface(tf);
+
+        homePageAction = (Button) findViewById(R.id.registerButton);
+        Log.d("HomeActivity", "Checking if device is registered");
+        homePageAction.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                startNewQuiz();
+                File database = getApplicationContext().getDatabasePath("eulerApplicationDatabase.db");
+                if(!database.exists()) {
+                    registerDevice();
+                }
+                else {
+                    openDash();
+                }
             }
         });
     }
@@ -50,7 +57,7 @@ public class UserDashboardActivity extends Activity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.user_dashboard, menu);
+        getMenuInflater().inflate(R.menu.register, menu);
         return true;
     }
 
@@ -66,28 +73,15 @@ public class UserDashboardActivity extends Activity {
         return super.onOptionsItemSelected(item);
     }
 
-    void startNewQuiz() {
-        Intent quizIntent = new Intent(getApplicationContext(), LearningActivity.class);
-        startActivity(quizIntent);
-        finish();
+    // This function opens the user dashboard
+    public void openDash() {
+        //Intent intent = new Intent(this, UserDashboardActivity.class);
+        Intent intent = new Intent(this, LearningActivity.class);
+        startActivity(intent);
     }
 
-    void bindViews() {
-        startQuiz = (Button) findViewById(R.id.takeQuiz);
-        welcomeMessage = (TextView) findViewById(R.id.userDashWelcome);
-        tf = Typeface.createFromAsset(getAssets(), "fonts/Pacifico.ttf");
-        welcomeMessage.setTypeface(tf);
-
-        apiKeyView = (TextView) findViewById(R.id.apiKeyView);
-        deviceKeyView = (TextView) findViewById(R.id.deviceKeyView);
-    }
-
-    void loadViews() {
-        EulerDB db = new EulerDB(getApplicationContext());
-        Map<String, String[]> userData = db.getUserData();
-
-        welcomeMessage.setText("Welcome, "+userData.get("name")[0]);
-        apiKeyView.setText(userData.get("keyData")[0]);
-        deviceKeyView.setText(userData.get("keyData")[1]);
+    public void registerDevice() {
+        Intent regIntent = new Intent(this, RegisterActivity.class);
+        startActivity(regIntent);
     }
 }

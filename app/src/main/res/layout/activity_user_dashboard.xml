@@ -8,7 +8,8 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     android:paddingBottom="@dimen/activity_vertical_margin"
     tools:context="com.example.marvel.fast_potato.UserDashboardActivity"
-    android:background="@drawable/dashboard_gradient">
+    android:background="@drawable/dashboard_gradient"
+    android:id="@+id/userKeyView">
 
     <TextView
         android:layout_width="wrap_content"
@@ -23,13 +24,13 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="User Data"
+        android:text="Your Keys:"
         android:id="@+id/basicData"
         android:textStyle="bold"
         android:singleLine="true"
         android:textColor="#ffffffff"
         android:textSize="20dp"
-        android:layout_below="@+id/progressBar"
+        android:layout_below="@+id/regsitrationProgress"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true" />
 
@@ -37,7 +38,7 @@
         style="?android:attr/progressBarStyleHorizontal"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:id="@+id/progressBar"
+        android:id="@+id/regsitrationProgress"
         android:layout_below="@+id/userDashWelcome"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
@@ -53,19 +54,31 @@
         android:layout_alignParentBottom="true"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
-        android:layout_alignRight="@+id/progressBar"
-        android:layout_alignEnd="@+id/progressBar"
+        android:layout_alignRight="@+id/regsitrationProgress"
+        android:layout_alignEnd="@+id/regsitrationProgress"
         android:background="#ffffa900"
         android:textColor="#ffffffff" />
 
-    <GridView
+    <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:id="@+id/topicsView"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
-        android:layout_above="@+id/takeQuiz"
+        android:text="New Text"
+        android:id="@+id/apiKeyView"
         android:layout_below="@+id/basicData"
-        android:fastScrollEnabled="true" />
+        android:layout_alignLeft="@+id/userDashWelcome"
+        android:layout_alignStart="@+id/userDashWelcome"
+        android:layout_alignRight="@+id/userDashWelcome"
+        android:layout_alignEnd="@+id/userDashWelcome" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="New Text"
+        android:id="@+id/deviceKeyView"
+        android:layout_below="@+id/apiKeyView"
+        android:layout_alignLeft="@+id/apiKeyView"
+        android:layout_alignStart="@+id/apiKeyView"
+        android:layout_alignRight="@+id/apiKeyView"
+        android:layout_alignEnd="@+id/apiKeyView" />
 
 </RelativeLayout>
