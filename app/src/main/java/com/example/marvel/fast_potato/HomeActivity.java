@@ -76,7 +76,7 @@ public class HomeActivity extends Activity {
     // This function opens the user dashboard
     public void openDash() {
         //Intent intent = new Intent(this, UserDashboardActivity.class);
-        Intent intent = new Intent(this, LearningActivity.class);
+        Intent intent = new Intent(this, UserDashboardActivity.class);
         startActivity(intent);
     }
 

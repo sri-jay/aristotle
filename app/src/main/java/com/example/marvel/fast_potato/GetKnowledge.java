@@ -1,5 +1,7 @@
 package com.example.marvel.fast_potato;
 
+import android.app.Activity;
+import android.app.ProgressDialog;
 import android.os.AsyncTask;
 
 import org.apache.http.client.HttpClient;
@@ -14,19 +16,35 @@ import org.json.JSONObject;
  */
 public class GetKnowledge extends AsyncTask<String, String, Knowledge>  {
 
-    private final String apiUrl = "https://droid-api.herokuapp.com/initialAssesment";
+    private static ProgressDialog pd = null;
+    private LearningActivity activityContext = null;
 
+    private final String apiUrl = "https://droid-api.herokuapp.com/initialAssessment";
+
+    GetKnowledge(Activity callerActivityContext) {
+        activityContext =(LearningActivity) callerActivityContext;
+        pd = new ProgressDialog(callerActivityContext);
+
+    }
+
+    @Override
+    protected  void onPreExecute(){
+        pd.setMessage("Loading..");
+        pd.show();
+    }
     @Override
     protected Knowledge doInBackground(String... string) {
 
+        publishProgress("Starting download.");
         HttpClient myDevice = new DefaultHttpClient();
         HttpPost request = new HttpPost(apiUrl);
 
         Knowledge knowledge = null;
         try{
+            publishProgress("Downloading...");
             String jsonData = EntityUtils.toString(myDevice.execute(request).getEntity());
             JSONObject json = new JSONObject(jsonData);
-
+            publishProgress("Finished Download");
             String id = json.getString("ID");
             String progress = json.getString("PATH_PROGRESS");
 
@@ -50,8 +68,17 @@ public class GetKnowledge extends AsyncTask<String, String, Knowledge>  {
     }
 
     @Override
+    protected void onPostExecute(Knowledge knowledge) {
+        activityContext.setActivityMode(knowledge);
+        pd.setMessage("Action Type : "+ knowledge.getKnowledgeType());
+        activityContext.updateViews(knowledge);
+        pd.setMessage("Loading Views..");
+        pd.hide();
+    }
+
+    @Override
     protected void onProgressUpdate(String... values) {
         super.onProgressUpdate(values);
-        System.out.println("Running on background");
+        pd.setMessage(values[0]);
     }
 }

@@ -17,8 +17,6 @@ import android.widget.RadioGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import java.util.concurrent.ExecutionException;
-
 public class LearningActivity extends Activity {
 
     private final static boolean QUIZ_MODE = true;
@@ -35,8 +33,6 @@ public class LearningActivity extends Activity {
     private RadioButton[] options = null;
 
     private Button getNextTask = null;
-
-    private Knowledge k = null;
 
     private boolean activityMode;
 
@@ -106,63 +102,43 @@ public class LearningActivity extends Activity {
         getNextTask.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                try {
-
-                    int choice = ansGroup.getCheckedRadioButtonId();
-                    if(choice == -1 && (activityMode == QUIZ_MODE)) {
-                        Toast.makeText(getApplicationContext(), "Select a choice please!", Toast.LENGTH_SHORT).show();
-                        return;
-                    }
-
-                    k = new GetKnowledge().execute().get();
-                    updateViews();
-                    pathProgress.setProgress(Integer.parseInt(k.getPathProgress()));
-
-                    if(k.getKnowledgeType().equals(KnowledgeTypes.KNOWLEDGE_TYPE_QUESTION))
-                        activityMode = QUIZ_MODE;
-                    else if(k.getKnowledgeType().equals(KnowledgeTypes.KNOWLEDGE_TYPE_UNIT))
-                        activityMode = UNIT_MODE;
-                }
-                catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-                catch (ExecutionException e) {
-                    e.printStackTrace();
-                }
+                init();
             }
         });
     }
 
     public void init() {
-        try {
-            k = new GetKnowledge().execute().get();
-            if(k.getKnowledgeType().equals(KnowledgeTypes.KNOWLEDGE_TYPE_QUESTION))
-                activityMode = QUIZ_MODE;
-            else if(k.getKnowledgeType().equals(KnowledgeTypes.KNOWLEDGE_TYPE_UNIT))
-                activityMode = UNIT_MODE;
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        } catch (ExecutionException e) {
-            e.printStackTrace();
+        try{
+            new GetKnowledge(this).execute();
         }
-        updateViews();
-    }
-    public void updateViews() {
-        if(k.getKnowledgeType().equals(KnowledgeTypes.KNOWLEDGE_TYPE_UNIT) ) {
-            setUnitView();
-        }
-        else if(k.getKnowledgeType().equals(KnowledgeTypes.KNOWLEDGE_TYPE_QUESTION)) {
-            setQuestionView();
+        catch (Exception e) {
+            e.printStackTrace();
         }
     }
 
-    public void setQuestionView() {
+    public void setActivityMode(Knowledge k) {
+        if(k.getKnowledgeType().equals(KnowledgeTypes.KNOWLEDGE_TYPE_QUESTION))
+            activityMode = QUIZ_MODE;
+        else if(k.getKnowledgeType().equals(KnowledgeTypes.KNOWLEDGE_TYPE_UNIT))
+            activityMode = UNIT_MODE;
+    }
+    public void updateViews(Knowledge k) {
+        if(k.getKnowledgeType().equals(KnowledgeTypes.KNOWLEDGE_TYPE_UNIT) ) {
+            setUnitView(k);
+        }
+        else if(k.getKnowledgeType().equals(KnowledgeTypes.KNOWLEDGE_TYPE_QUESTION)) {
+            setQuestionView(k);
+        }
+    }
+
+    public void setQuestionView(Knowledge k) {
         ansGroup.setVisibility(View.VISIBLE);
         String questionTitle = k.getKnowledgeTitle();
         Log.d("setQuestionView()", k.getKnowledgeTitle());
         String[] questionOptions = (String[]) k.getKnowledgeContent();
 
-        knAdvert.setText("Pop Quiz! Hash : "+k.getUniqueHash().substring(0,10));
+        knAdvert.setText("Pop Quiz!");
+        Toast.makeText(getApplicationContext(),k.getUniqueHash(),Toast.LENGTH_SHORT).show();
         knTitle.setText(questionTitle);
 
         StringBuilder sb = new StringBuilder();
@@ -171,12 +147,13 @@ public class LearningActivity extends Activity {
         knContent.setText(sb.toString());
     }
 
-    public void setUnitView() {
+    public void setUnitView(Knowledge k) {
         ansGroup.setVisibility(View.GONE);
         String unitTitle = k.getKnowledgeTitle();
         String unitKnowledge = (String) k.getKnowledgeContent();
 
-        knAdvert.setText("Here is a small topic! Hash : "+k.getUniqueHash().substring(0,10));
+        knAdvert.setText("Here is a small topic!");
+        Toast.makeText(getApplicationContext(),k.getUniqueHash(),Toast.LENGTH_SHORT).show();
         knTitle.setText(unitTitle);
         knContent.setText(unitKnowledge);
     }
