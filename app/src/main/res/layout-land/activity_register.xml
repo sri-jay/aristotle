@@ -65,8 +65,7 @@
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
         android:layout_alignRight="@+id/orgSelect"
-        android:layout_alignEnd="@+id/orgSelect"
-        android:selectAllOnFocus="true" />
+        android:layout_alignEnd="@+id/orgSelect" />
 
     <EditText
         android:layout_width="wrap_content"
@@ -79,8 +78,7 @@
         android:layout_alignRight="@+id/fNameField"
         android:layout_alignEnd="@+id/fNameField"
         android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
-        android:selectAllOnFocus="true" />
+        android:layout_alignParentStart="true" />
 
     <TextView
         android:layout_width="wrap_content"
@@ -92,43 +90,5 @@
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
         android:textColor="#ffffffff" />
-
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textAppearance="?android:attr/textAppearanceMedium"
-        android:text="Tell us your number?"
-        android:id="@+id/phNo"
-        android:layout_below="@+id/lNameField"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
-        android:textColor="#ffffffff" />
-
-    <EditText
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:inputType="phone"
-        android:ems="10"
-        android:id="@+id/pNumField"
-        android:layout_below="@+id/phNo"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentEnd="true"
-        android:phoneNumber="true"
-        android:password="false"
-        android:selectAllOnFocus="true" />
-
-    <Button
-        style="?android:attr/buttonStyleSmall"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Register!"
-        android:id="@+id/registerUserButton"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentEnd="true" />
 
 </RelativeLayout>

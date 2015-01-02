@@ -1,5 +1,8 @@
 package com.example.marvel.fast_potato;
 
+import android.app.Activity;
+import android.app.ProgressDialog;
+import android.content.Intent;
 import android.os.AsyncTask;
 import android.util.Log;
 
@@ -60,6 +63,21 @@ public class RegisterUserDevice {
     static class RegisterDevice extends AsyncTask<String, String, Map<String, String> > {
 
         private final String registerApiUrl = "https://droid-api.herokuapp.com/registerDevice";
+        private Activity callerActivity = null;
+        private ProgressDialog pd = null;
+
+        RegisterDevice(Activity caller){
+            callerActivity = caller;
+            pd = new ProgressDialog(callerActivity);
+            pd.setCanceledOnTouchOutside(false);
+        }
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            pd.setMessage("Processing..");
+            pd.show();
+        }
 
         @Override
         protected Map<String, String> doInBackground(String... data) {
@@ -80,6 +98,7 @@ public class RegisterUserDevice {
             postData.add(new BasicNameValuePair("CLIENT_ID", data[0]));
             postData.add(new BasicNameValuePair("F_NAME", data[1]));
             postData.add(new BasicNameValuePair("L_NAME", data[2]));
+            postData.add(new BasicNameValuePair("PHONE_NUMBER", data[3]));
 
             try {
                 request.setEntity(new UrlEncodedFormEntity(postData, "UTF-8"));
@@ -99,6 +118,36 @@ public class RegisterUserDevice {
                 Log.e("RegisterUserDevice : ", e.getStackTrace().toString());
             }
             return regData;
+        }
+
+        @Override
+        protected void onPostExecute(Map<String, String> regData) {
+            super.onPostExecute(regData);
+
+            pd.dismiss();
+
+            if(regData.get("STATUS").equals(RegisterUserDevice.REGISTER_SUCCESS)) {
+                createLocalDatabase(regData.get("API_KEY"), regData.get("USER_ID"), regData.get("CLIENT_ID"));
+                saveUserData(regData.get("FIRST_NAME"), regData.get("LAST_NAME"));
+
+                Intent intent = new Intent(callerActivity, UserDashboardActivity.class);
+
+                /*
+                    Registration is done, open Dash and show welcome to user.
+                * */
+                callerActivity.startActivity(intent);
+                callerActivity.finish();
+            }
+        }
+
+        public void createLocalDatabase(String apiKey, String deviceKey, String userOrg) {
+            EulerDB db = new EulerDB(callerActivity);
+            db.initAndSaveApiData(apiKey, deviceKey, userOrg);
+        }
+
+        public void saveUserData(String firstName, String lastName) {
+            EulerDB db = new EulerDB(callerActivity);
+            db.saveUserData(firstName, lastName);
         }
     }
 }

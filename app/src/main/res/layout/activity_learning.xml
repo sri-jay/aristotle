@@ -7,8 +7,7 @@
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
     android:paddingBottom="@dimen/activity_vertical_margin"
-    android:background="@drawable/quiz_loading_gradient"
-    android:screenOrientation="portrait">
+    android:background="@drawable/quiz_loading_gradient">
 
     <!--android:screenOrientation="portrait" must be present
     otherwise screen rotation during download will result in leaked windows.-->
@@ -135,6 +134,17 @@
             android:id="@+id/option_g"
             android:textSize="12sp" />
     </RadioGroup>
+
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/imageContent"
+        android:layout_below="@+id/knowledgeTitle"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_above="@+id/ansGroup"
+        android:layout_alignRight="@+id/knowledgeContent"
+        android:layout_alignEnd="@+id/knowledgeContent" />
 
 </RelativeLayout>
 

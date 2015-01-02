@@ -55,7 +55,7 @@
         android:id="@+id/imageView"
         android:layout_alignLeft="@+id/register_advert"
         android:layout_alignStart="@+id/register_advert"
-        android:src="@drawable/logo2"
+        android:src="@drawable/ic_launcher2k"
         android:layout_alignRight="@+id/register_advert"
         android:layout_alignEnd="@+id/register_advert"
         android:layout_above="@+id/registerButton"

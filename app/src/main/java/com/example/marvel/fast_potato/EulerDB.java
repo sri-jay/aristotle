@@ -22,7 +22,9 @@ public class EulerDB extends SQLiteOpenHelper {
             "CREATE TABLE application_logging (desc text, data text);",
             "CREATE TABLE user_log (in_time text, out_time text);",
             "CREATE TABLE quiz_log (quiz_hash text, start_time text, end_time text);",
-            "CREATE TABLE user_info (first_name text, last_name text);"
+            "CREATE TABLE user_info (first_name text, last_name text);",
+            "CREATE TABLE course_sequence (sequence text)",
+            "INSERT INTO course_sequence VALUES(\'-1\')"
     };
 
     public EulerDB(Context context) {
@@ -34,9 +36,10 @@ public class EulerDB extends SQLiteOpenHelper {
         Log.d("RegisterUserDevice", "Creating local database.");
         for(String query : INIT_QUERIES) {
             db.execSQL(query);
-            Log.d("RegisterUserDevice","Creating Table -> "+query);
+            Log.d("RegisterUserDevice","Executing -> "+query);
         }
         Log.d("RegisterUserDevice","Done creating tables.");
+
     }
 
     @Override
@@ -73,6 +76,22 @@ public class EulerDB extends SQLiteOpenHelper {
 
         data.put("keyData", new String[] {c.getString(0), c.getString(1)});
         c.close();
+        return data;
+    }
+
+    public void updateSequence(String seq) {
+        SQLiteDatabase db = getWritableDatabase();
+        db.execSQL("UPDATE course_sequence SET sequence = \'"+seq+"\';");
+    }
+
+    public String getSequence(){
+        SQLiteDatabase db = getWritableDatabase();
+        Cursor c = db.rawQuery("SELECT * FROM course_sequence", null);
+        c.moveToFirst();
+
+        String data = c.getString(0);
+        c.close();
+
         return data;
     }
 }

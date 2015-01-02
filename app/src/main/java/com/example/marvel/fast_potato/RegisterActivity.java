@@ -1,8 +1,9 @@
 package com.example.marvel.fast_potato;
 
 import android.app.Activity;
-import android.content.Intent;
+import android.content.Context;
 import android.os.Bundle;
+import android.telephony.TelephonyManager;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -23,6 +24,7 @@ public class RegisterActivity extends Activity {
     private Spinner orgSpinner = null;
     private EditText firstName = null;
     private EditText lastName = null;
+    private EditText phoneNum = null;
 
     private Button doRegister = null;
 
@@ -83,7 +85,14 @@ public class RegisterActivity extends Activity {
         orgSpinner = (Spinner) findViewById(R.id.orgSelect);
         firstName = (EditText) findViewById(R.id.fNameField);
         lastName = (EditText) findViewById(R.id.lNameField);
+        phoneNum = (EditText) findViewById(R.id.pNumField);
         doRegister = (Button) findViewById(R.id.registerUserButton);
+
+        TelephonyManager tMgr =(TelephonyManager)this.getSystemService(Context.TELEPHONY_SERVICE);
+        String mPhoneNumber = tMgr.getLine1Number();
+
+        if(mPhoneNumber != null)
+            phoneNum.setText(mPhoneNumber);
     }
 
     public void setOnClickListeners() {
@@ -100,30 +109,12 @@ public class RegisterActivity extends Activity {
             String fName = firstName.getText().toString();
             String lName = lastName.getText().toString();
             String clientId = orgData.get(orgSpinner.getSelectedItem().toString());
+            String phoneNumber = phoneNum.getText().toString();
 
-            Map<String ,String> regData = new RegisterUserDevice.RegisterDevice().execute(clientId, fName, lName).get();
-
-            if(regData.get("STATUS").equals(RegisterUserDevice.REGISTER_SUCCESS)) {
-                createLocalDatabase(regData.get("API_KEY"), regData.get("USER_ID"), regData.get("CLIENT_ID"));
-                saveUserData(regData.get("FIRST_NAME"), regData.get("LAST_NAME"));
-
-                Intent intent = new Intent(this, UserDashboardActivity.class);
-                startActivity(intent);
-                finish();
-            }
+            new RegisterUserDevice.RegisterDevice(this).execute(clientId, fName, lName, phoneNumber);
         }
         catch (Exception e){
             e.printStackTrace();
         }
-    }
-
-    public void createLocalDatabase(String apiKey, String deviceKey, String userOrg) {
-        EulerDB db = new EulerDB(getApplicationContext());
-        db.initAndSaveApiData(apiKey, deviceKey, userOrg);
-    }
-
-    public void saveUserData(String firstName, String lastName) {
-        EulerDB db = new EulerDB(getApplicationContext());
-        db.saveUserData(firstName, lastName);
     }
 }
