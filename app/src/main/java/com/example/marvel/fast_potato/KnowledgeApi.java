@@ -2,6 +2,8 @@ package com.example.marvel.fast_potato;
 
 import android.app.Activity;
 import android.app.ProgressDialog;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
 import android.util.Log;
 
@@ -67,14 +69,16 @@ public class KnowledgeApi {
                 String id = json.getString("ID");
                 String progress = json.getString("PATH_PROGRESS");
 
+                Bitmap bmp = BitmapFactory.decodeStream(new java.net.URL(json.getString("IMAGE_URL")).openStream());
+
                 if (json.getString("TYPE").equals(KnowledgeTypes.KNOWLEDGE_TYPE_QUESTION)) {
                     String statement = json.getString("STATEMENT");
                     String[] qoptions = {json.getString("OPTION_A"), json.getString("OPTION_B"), json.getString("OPTION_C")};
-                    knowledge = new QuestionUnit(id, statement, null, qoptions, progress);
+                    knowledge = new QuestionUnit(id, statement, null, qoptions, progress, bmp);
                 } else if (json.getString("TYPE").equals(KnowledgeTypes.KNOWLEDGE_TYPE_UNIT)) {
                     String title = json.getString("TITLE");
                     String content = json.getString("CONTENT");
-                    knowledge = new KnowledgeUnit(id, content, title, progress);
+                    knowledge = new KnowledgeUnit(id, content, title, progress, bmp);
                 }
 
                 new EulerDB(activityContext).updateSequence(json.getString("SEQUENCE"));
@@ -92,6 +96,9 @@ public class KnowledgeApi {
             pd.setMessage("Action Type : " + knowledge.getKnowledgeType());
             activityContext.setActivityMode();
             activityContext.updateViews();
+            activityContext.setProgress();
+            activityContext.showImagePopup();
+
             pd.setMessage("Loading Views..");
             pd.hide();
         }
@@ -106,18 +113,25 @@ public class KnowledgeApi {
     static class SaveProgress extends AsyncTask<String, String, String> {
 
         private final String apiUrl = "https://droid-api.herokuapp.com/recordResponse";
+
+        private ProgressDialog pd = null;
         private LearningActivity activityContext = null;
+
         private Knowledge knowledge = null;
 
         SaveProgress(LearningActivity activity) {
             activityContext = activity;
             knowledge = activityContext.knowledge;
+            pd = new ProgressDialog(activityContext);
+            pd.setCanceledOnTouchOutside(false);
         }
 
         @Override
         protected void onPreExecute() {
-            super.onPreExecute();
+            pd.setMessage("Saving Progress");
+            pd.show();
         }
+
 
         @Override
         protected String doInBackground(String... strings) {
@@ -130,7 +144,7 @@ public class KnowledgeApi {
             postData.add(new BasicNameValuePair("RESPONSE_FOR", knowledge.getKnowledgeType()));
             postData.add(new BasicNameValuePair("DEVICE_ID", deviceData.get("keyData")[1]));
             postData.add(new BasicNameValuePair("COURSE_ID", "GK214"));
-            postData.add(new BasicNameValuePair("RESPONSE", "TEST_RESPONSE"));
+            postData.add(new BasicNameValuePair("RESPONSE", strings[0]));
             postData.add(new BasicNameValuePair("SEQUENCE", new EulerDB(activityContext).getSequence()));
 
             Log.d("", knowledge.getKnowledgeType());
@@ -152,6 +166,8 @@ public class KnowledgeApi {
         @Override
         protected void onPostExecute(String s) {
             super.onPostExecute(s);
+            pd.setMessage("Done!");
+            pd.dismiss();
         }
     }
 }

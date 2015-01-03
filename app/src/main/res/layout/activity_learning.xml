@@ -61,18 +61,16 @@
         android:textSize="20sp" />
 
     <TextView
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:id="@+id/knowledgeContent"
-        android:layout_alignRight="@+id/pathProgress"
-        android:layout_alignEnd="@+id/pathProgress"
         android:textSize="14dp"
         android:scrollbars="vertical"
         android:maxLines="25"
+        android:layout_alignBottom="@+id/imageContent"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
-        android:layout_below="@+id/knowledgeTitle"
-        android:layout_above="@+id/ansGroup" />
+        android:layout_below="@+id/knowledgeTitle" />
 
     <RadioGroup
         android:layout_width="fill_parent"
@@ -145,6 +143,17 @@
         android:layout_above="@+id/ansGroup"
         android:layout_alignRight="@+id/knowledgeContent"
         android:layout_alignEnd="@+id/knowledgeContent" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/progressAdvert"
+        android:layout_above="@+id/pathProgress"
+        android:textSize="25sp"
+        android:textColor="#ffffffff"
+        android:layout_alignParentTop="true"
+        android:layout_alignRight="@+id/pathProgress"
+        android:layout_alignEnd="@+id/pathProgress" />
 
 </RelativeLayout>
 

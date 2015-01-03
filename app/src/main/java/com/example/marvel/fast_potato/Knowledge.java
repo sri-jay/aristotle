@@ -10,4 +10,6 @@ public interface Knowledge {
 
     public String getKnowledgeTitle();
     public Object getKnowledgeContent();
+
+    public Object getMultimediaContent();
 }
