@@ -1,8 +1,6 @@
 package com.example.marvel.fast_potato;
 
-import android.app.Activity;
 import android.app.ProgressDialog;
-import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
 import android.util.Log;
@@ -17,6 +15,7 @@ import org.apache.http.util.EntityUtils;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -25,18 +24,25 @@ import java.util.Map;
  * Fetches questions from the database.
  */
 
+//Has 2 classes:
+//  * One to get Information from the api,
+//  * One to submit information to the api.
+//
 public class KnowledgeApi {
     static class GetKnowledge extends AsyncTask<String, String, Knowledge> {
 
         private ProgressDialog pd = null;
         private LearningActivity activityContext = null;
 
-        private final String apiUrl = "https://droid-api.herokuapp.com/getNextItemInPath";
+        private final String apiUrl = "https://droid-api-staging.herokuapp.com/getNextItemInPath";
 
-        GetKnowledge(Activity callerActivityContext) {
+        private boolean save = false;
+
+        GetKnowledge(LearningActivity callerActivityContext, boolean chainWIthSave) {
             activityContext = (LearningActivity) callerActivityContext;
             pd = new ProgressDialog(callerActivityContext);
             pd.setCanceledOnTouchOutside(false);
+            save = chainWIthSave;
         }
 
         @Override
@@ -56,7 +62,7 @@ public class KnowledgeApi {
 
             Map<String, String[]> deviceData = new EulerDB(activityContext).getUserData();
             postData.add(new BasicNameValuePair("DEVICE_ID", deviceData.get("keyData")[1]));
-
+            postData.add(new BasicNameValuePair("COURSE_ID", "GK214"));
             Knowledge knowledge = null;
             try {
                 request.setEntity(new UrlEncodedFormEntity(postData, "UTF-8"));
@@ -69,16 +75,23 @@ public class KnowledgeApi {
                 String id = json.getString("ID");
                 String progress = json.getString("PATH_PROGRESS");
 
-                Bitmap bmp = BitmapFactory.decodeStream(new java.net.URL(json.getString("IMAGE_URL")).openStream());
 
                 if (json.getString("TYPE").equals(KnowledgeTypes.KNOWLEDGE_TYPE_QUESTION)) {
                     String statement = json.getString("STATEMENT");
                     String[] qoptions = {json.getString("OPTION_A"), json.getString("OPTION_B"), json.getString("OPTION_C")};
-                    knowledge = new QuestionUnit(id, statement, null, qoptions, progress, bmp);
-                } else if (json.getString("TYPE").equals(KnowledgeTypes.KNOWLEDGE_TYPE_UNIT)) {
+                    if(json.getString("MEDIA_TYPE").equals("image"))
+                        knowledge = new QuestionUnit(id, statement, null, qoptions, progress, BitmapFactory.decodeStream(new java.net.URL(json.getString("MEDIA_URL")).openStream()), "image");
+                    else
+                        knowledge = new QuestionUnit(id, statement, null, qoptions, progress, json.getString("MEDIA_URL"), "video");
+                }
+
+                else if (json.getString("TYPE").equals(KnowledgeTypes.KNOWLEDGE_TYPE_UNIT)) {
                     String title = json.getString("TITLE");
                     String content = json.getString("CONTENT");
-                    knowledge = new KnowledgeUnit(id, content, title, progress, bmp);
+                    if(json.getString("MEDIA_TYPE").equals("image"))
+                        knowledge = new KnowledgeUnit(id, content, title, progress, BitmapFactory.decodeStream(new java.net.URL(json.getString("MEDIA_URL")).openStream()), "image");
+                    else
+                        knowledge = new KnowledgeUnit(id, content, title, progress, json.get("MEDIA_URL"), "video");
                 }
 
                 new EulerDB(activityContext).updateSequence(json.getString("SEQUENCE"));
@@ -92,15 +105,24 @@ public class KnowledgeApi {
 
         @Override
         protected void onPostExecute(Knowledge knowledge) {
-            activityContext.knowledge = knowledge;
-            pd.setMessage("Action Type : " + knowledge.getKnowledgeType());
-            activityContext.setActivityMode();
-            activityContext.updateViews();
-            activityContext.setProgress();
-            activityContext.showImagePopup();
+            try {
+                if(knowledge == null)
+                    System.out.println("Null!");
 
-            pd.setMessage("Loading Views..");
-            pd.hide();
+                activityContext.knowledge = knowledge;
+                pd.setMessage("Action Type : " + knowledge.getKnowledgeType());
+                activityContext.setActivityMode();
+                activityContext.updateViews();
+                activityContext.setProgress();
+                activityContext.showPopup();
+
+                pd.setMessage("Loading Views..");
+                pd.hide();
+            }
+            catch (Exception e) {
+                e.printStackTrace();
+            }
+
         }
 
         @Override
@@ -112,7 +134,7 @@ public class KnowledgeApi {
 
     static class SaveProgress extends AsyncTask<String, String, String> {
 
-        private final String apiUrl = "https://droid-api.herokuapp.com/recordResponse";
+        private final String apiUrl = "https://droid-api-staging.herokuapp.com/recordResponse";
 
         private ProgressDialog pd = null;
         private LearningActivity activityContext = null;
@@ -146,12 +168,8 @@ public class KnowledgeApi {
             postData.add(new BasicNameValuePair("COURSE_ID", "GK214"));
             postData.add(new BasicNameValuePair("RESPONSE", strings[0]));
             postData.add(new BasicNameValuePair("SEQUENCE", new EulerDB(activityContext).getSequence()));
+            postData.add(new BasicNameValuePair("DURATION", knowledge.getTelemetrics().getDuration()));
 
-            Log.d("", knowledge.getKnowledgeType());
-            Log.d("", deviceData.get("keyData")[1]);
-            Log.d("", "GK14");
-            Log.d("", "TEST");
-            Log.d("", new EulerDB(activityContext).getSequence());
             try {
                 post.setEntity(new UrlEncodedFormEntity(postData, "UTF-8"));
                 client.execute(post).getEntity();
@@ -167,6 +185,66 @@ public class KnowledgeApi {
         protected void onPostExecute(String s) {
             super.onPostExecute(s);
             pd.setMessage("Done!");
+            pd.dismiss();
+        }
+    }
+
+    static class GetAllCourses extends AsyncTask<String, String, String[]>{
+        private final String apiUrl = "https://droid-api-staging.herokuapp.com/getAllCourses";
+        private ProgressDialog pd = null;
+
+        private RegisterCourse activity = null;
+
+        GetAllCourses(RegisterCourse caller){
+            activity =  caller;
+            pd = new ProgressDialog(activity);
+            pd.setCanceledOnTouchOutside(false);
+        }
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            pd.setMessage("Loading Courses");
+            pd.show();
+        }
+
+        @Override
+        protected String[] doInBackground(String... strings) {
+            HttpClient device = new DefaultHttpClient();
+            HttpPost request = new HttpPost(apiUrl);
+
+            Map<String, String[]> deviceData = new EulerDB(activity).getUserData();
+            List<NameValuePair> postData = new ArrayList<NameValuePair>();
+            postData.add(new BasicNameValuePair("DEVICE_KEY", deviceData.get("keyData")[1]));
+
+            String[] data = null;
+
+            try {
+                request.setEntity(new UrlEncodedFormEntity(postData,"UTF-8"));
+                String jsonAsString = EntityUtils.toString(device.execute(request).getEntity());
+                JSONObject json = new JSONObject(jsonAsString);
+
+                data = new String[json.length()];
+                Log.d("JSON STRING: ", jsonAsString);
+
+                Iterator<String> keys = json.keys();
+
+                for(int i=0;keys.hasNext();i++){
+                    String key = (String) keys.next();
+                    data[i] = key+";"+json.getString(key);
+                }
+            }
+
+            catch (Exception e){
+                e.printStackTrace();
+            }
+            return data;
+        }
+
+        @Override
+        protected void onPostExecute(String[] data) {
+            super.onPostExecute(data);
+            activity.loadCourses(activity, data);
             pd.dismiss();
         }
     }

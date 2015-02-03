@@ -1,7 +1,5 @@
 package com.example.marvel.fast_potato;
 
-import android.graphics.Bitmap;
-
 /**
  * Created by Sriduth_2 on 22-12-2014.
  */
@@ -10,17 +8,22 @@ public class QuestionUnit extends KnowledgeTypes implements Knowledge {
     private String questionStatement = null;
     private String questionData = null;
     private String[] answerOptions = null;
-    private Bitmap imageContent = null;
+    private Object mediaContent = null;
+    private String mediaType = null;
 
     private String answer = null;
 
-    QuestionUnit(String qId, String qStm, String qData, String[] qOptions, String pProgress, Bitmap bmp) {
+    private UserTelemetrics telemetrics = null;
+
+    QuestionUnit(String qId, String qStm, String qData, String[] qOptions, String pProgress, Object media, String type) {
         questionID = qId;
         questionStatement = qStm;
         questionData = qData;
         answerOptions = qOptions;
         pathProgress = pProgress;
-        imageContent = bmp;
+        mediaContent = media;
+        mediaType = type;
+        telemetrics = new UserInteractionTelemetry.QuestionTelemetry();
     }
 
     @Override
@@ -66,6 +69,14 @@ public class QuestionUnit extends KnowledgeTypes implements Knowledge {
 
     @Override
     public Object getMultimediaContent() {
-        return imageContent;
+        return mediaContent;
     }
+
+    @Override
+    public UserTelemetrics getTelemetrics() {
+        return telemetrics;
+    }
+
+    @Override
+    public String getMediaType() { return mediaType; }
 }

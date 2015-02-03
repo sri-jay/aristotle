@@ -60,15 +60,13 @@
         android:textColor="#ffffffff" />
 
     <TextView
-        android:layout_width="wrap_content"
+        android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:text="New Text"
         android:id="@+id/apiKeyView"
         android:layout_below="@+id/basicData"
-        android:layout_alignLeft="@+id/userDashWelcome"
-        android:layout_alignStart="@+id/userDashWelcome"
-        android:layout_alignRight="@+id/userDashWelcome"
-        android:layout_alignEnd="@+id/userDashWelcome" />
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true" />
 
     <TextView
         android:layout_width="wrap_content"
@@ -80,5 +78,16 @@
         android:layout_alignStart="@+id/apiKeyView"
         android:layout_alignRight="@+id/apiKeyView"
         android:layout_alignEnd="@+id/apiKeyView" />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Regsiter For Courses"
+        android:id="@+id/regisiter_for_courses"
+        android:layout_above="@+id/takeQuiz"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true" />
 
 </RelativeLayout>

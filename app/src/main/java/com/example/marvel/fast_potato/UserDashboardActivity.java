@@ -22,6 +22,7 @@ public class UserDashboardActivity extends Activity {
 
     private Typeface tf = null;
     private Button startQuiz = null;
+    private Button registerCourse = null;
 
     private Knowledge quiz = null;
 
@@ -38,10 +39,17 @@ public class UserDashboardActivity extends Activity {
 
         bindViews();
         loadViews();
+
         startQuiz.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 startNewQuiz();
+            }
+        });
+        registerCourse.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                openRegistrationDash();
             }
         });
     }
@@ -69,11 +77,18 @@ public class UserDashboardActivity extends Activity {
     void startNewQuiz() {
         Intent quizIntent = new Intent(getApplicationContext(), LearningActivity.class);
         startActivity(quizIntent);
-        finish();
+        //finish();
+    }
+
+    void openRegistrationDash() {
+        Intent intent = new Intent(getApplicationContext(), RegisterCourse.class);
+        startActivity(intent);
     }
 
     void bindViews() {
         startQuiz = (Button) findViewById(R.id.takeQuiz);
+        registerCourse = (Button) findViewById(R.id.regisiter_for_courses);
+
         welcomeMessage = (TextView) findViewById(R.id.userDashWelcome);
         tf = Typeface.createFromAsset(getAssets(), "fonts/Pacifico.ttf");
         welcomeMessage.setTypeface(tf);

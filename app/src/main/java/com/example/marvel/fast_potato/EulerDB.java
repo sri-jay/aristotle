@@ -18,13 +18,12 @@ public class EulerDB extends SQLiteOpenHelper {
     private static final int DATABASE_VERSION = 1;
     private final String[] INIT_QUERIES = {
             "CREATE TABLE api_information (api_key text, device_key text, user_org text);",
-            "CREATE TABLE learning_path (path_status text);",
-            "CREATE TABLE application_logging (desc text, data text);",
             "CREATE TABLE user_log (in_time text, out_time text);",
-            "CREATE TABLE quiz_log (quiz_hash text, start_time text, end_time text);",
             "CREATE TABLE user_info (first_name text, last_name text);",
-            "CREATE TABLE course_sequence (sequence text)",
-            "INSERT INTO course_sequence VALUES(\'-1\')"
+            "CREATE TABLE user_action(courseid text, sequence text, responsetounit text, responsetoquestion text)",
+
+            "CREATE TABLE course_sequence (courseid text, sequence text)",
+            "INSERT INTO course_sequence VALUES(\'GK214\',\'-1\')"
     };
 
     public EulerDB(Context context) {
@@ -69,6 +68,8 @@ public class EulerDB extends SQLiteOpenHelper {
         Cursor c = db.rawQuery(userDetailQuery, null);
         c.moveToFirst();
 
+        System.out.println(c.getString(0));
+
         data.put("name", new String[] {c.getString(0), c.getString(1)});
 
         c = db.rawQuery(userKeysQuery, null);
@@ -89,7 +90,7 @@ public class EulerDB extends SQLiteOpenHelper {
         Cursor c = db.rawQuery("SELECT * FROM course_sequence", null);
         c.moveToFirst();
 
-        String data = c.getString(0);
+        String data = c.getString(1);
         c.close();
 
         return data;

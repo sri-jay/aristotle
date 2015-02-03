@@ -3,12 +3,18 @@ package com.example.marvel.fast_potato;
 import android.app.Activity;
 import android.app.Dialog;
 import android.graphics.Bitmap;
+import android.graphics.Matrix;
+import android.graphics.PointF;
 import android.graphics.Typeface;
+import android.net.Uri;
 import android.os.Bundle;
 import android.text.method.ScrollingMovementMethod;
+import android.util.FloatMath;
 import android.util.Log;
+import android.view.Display;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
@@ -19,8 +25,10 @@ import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.VideoView;
 
 public class LearningActivity extends Activity {
+    private View[] views = null;
 
     private final static boolean QUIZ_MODE = true;
     private final static boolean UNIT_MODE = false;
@@ -44,6 +52,8 @@ public class LearningActivity extends Activity {
 
     public Knowledge knowledge = null;
 
+    private int progress = 0;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -58,7 +68,7 @@ public class LearningActivity extends Activity {
         setOnClickListeners();
 
         try{
-            new KnowledgeApi.GetKnowledge(this).execute();
+            new KnowledgeApi.GetKnowledge(this, false).execute();
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -129,7 +139,7 @@ public class LearningActivity extends Activity {
         knContent.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View view) {
-                showImagePopup();
+                showPopup();
                 return true;
             }
         });
@@ -138,7 +148,7 @@ public class LearningActivity extends Activity {
     public void init() {
         try{
             new KnowledgeApi.SaveProgress(this).execute(saveAnswer()).get();
-            new KnowledgeApi.GetKnowledge(this).execute();
+            new KnowledgeApi.GetKnowledge(this, false).execute();
             ansGroup.clearCheck();
         }
         catch (Exception e) {
@@ -153,6 +163,7 @@ public class LearningActivity extends Activity {
             activityMode = UNIT_MODE;
     }
     public void updateViews() {
+        knowledge.getTelemetrics().start();
         if(knowledge.getKnowledgeType().equals(KnowledgeTypes.KNOWLEDGE_TYPE_UNIT) ) {
             setUnitView();
         }
@@ -188,17 +199,15 @@ public class LearningActivity extends Activity {
 
     public String saveAnswer() {
         int choice = ansGroup.getCheckedRadioButtonId();
-        RadioButton temp = (RadioButton) findViewById(choice);
 
+        knowledge.getTelemetrics().stop();
         String data = "KNOWLEDGE_CONSUMED";
         if(knowledge.getKnowledgeType().equals(KnowledgeTypes.KNOWLEDGE_TYPE_QUESTION)) {
-            data = temp.getText().toString();
-            if (data == null){
-                return "-1";
-            }
             if(choice == -1 && activityMode) {
                 return "-1";
             }
+            RadioButton temp = (RadioButton) findViewById(choice);
+            data = temp.getText().toString();
         }
         return data;
     }
@@ -209,10 +218,23 @@ public class LearningActivity extends Activity {
         pathProgressAdvert.setText("Your Progress : "+prog+"%");
     }
 
-    public void setImageContent() {
-        imageContent.setImageBitmap((Bitmap) knowledge.getMultimediaContent());
+    public void showPopup() {
+        if(knowledge.getMediaType().equals("image"))
+            showImagePopup();
+        else
+            showVideoPopup();
     }
+    public void showVideoPopup() {
+        Dialog videoBox = new Dialog(this);
+        videoBox.getWindow().requestFeature(Window.FEATURE_NO_TITLE);
+        View popup = getLayoutInflater().inflate(R.layout.learning_video_popup, null);
+        videoBox.setContentView(popup);
 
+        VideoView video = (VideoView) popup.findViewById(R.id.videoPopupContent);
+        video.setVideoURI(Uri.parse(knowledge.getMultimediaContent().toString()));
+        video.start();
+        videoBox.show();
+    }
     public void showImagePopup() {
         Toast.makeText(getApplicationContext(),"! : You can view the image anytime by long clicking the screen.", Toast.LENGTH_LONG).show();
 
@@ -226,5 +248,81 @@ public class LearningActivity extends Activity {
         view.setImageBitmap((Bitmap) knowledge.getMultimediaContent());
 
         settingsDialog.show();
+
+        view.setOnTouchListener(new View.OnTouchListener() {
+            // These matrices will be used to move and zoom image
+            Matrix matrix = new Matrix();
+            Matrix savedMatrix = new Matrix();
+
+            // We can be in one of these 3 states
+            static final int NONE = 0;
+            static final int DRAG = 1;
+            static final int ZOOM = 2;
+            int mode = NONE;
+
+            // Remember some things for zooming
+            PointF start = new PointF();
+            PointF mid = new PointF();
+            float oldDist = 1f;
+            String savedItemClicked;
+
+            @Override
+            public boolean onTouch(View view, MotionEvent event) {
+                Display dis = getWindowManager().getDefaultDisplay();
+                ImageView image = (ImageView) view;
+
+                switch (event.getAction() & MotionEvent.ACTION_MASK) {
+                    case MotionEvent.ACTION_DOWN:
+                        savedMatrix.set(matrix);
+                        start.set(event.getX(), event.getY());
+                        mode = DRAG;
+                        break;
+                    case MotionEvent.ACTION_POINTER_DOWN:
+                        oldDist = spacing(event);
+                        if (oldDist > 10f) {
+                            savedMatrix.set(matrix);
+                            midPoint(mid, event);
+                            mode = ZOOM;
+                        }
+                        break;
+                    case MotionEvent.ACTION_UP:
+                    case MotionEvent.ACTION_POINTER_UP:
+                        mode = NONE;
+                        break;
+                    case MotionEvent.ACTION_MOVE:
+                        if (mode == DRAG) {
+                            // ...
+                            matrix.set(savedMatrix);
+                            matrix.postTranslate(event.getX() - start.x, event.getY()
+                                    - start.y);
+                        } else if (mode == ZOOM) {
+                            float newDist = spacing(event);
+                            if (newDist > 10f) {
+                                matrix.set(savedMatrix);
+                                float scale = newDist / oldDist;
+                                matrix.postScale(scale, scale, mid.x, mid.y);
+                            }
+                        }
+                        break;
+                }
+                ((ImageView) view).setImageMatrix(matrix);
+                return true;
+            }
+
+
+            /** Determine the space between the first two fingers */
+            private float spacing(MotionEvent event) {
+                float x = event.getX(0) - event.getX(1);
+                float y = event.getY(0) - event.getY(1);
+                return FloatMath.sqrt(x * x + y * y);
+            }
+
+            /** Calculate the mid point of the first two fingers */
+            private void midPoint(PointF point, MotionEvent event) {
+                float x = event.getX(0) + event.getX(1);
+                float y = event.getY(0) + event.getY(1);
+                point.set(x / 2, y / 2);
+            }
+        });
     }
 }

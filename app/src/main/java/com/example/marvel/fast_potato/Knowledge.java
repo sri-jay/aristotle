@@ -12,4 +12,8 @@ public interface Knowledge {
     public Object getKnowledgeContent();
 
     public Object getMultimediaContent();
+
+    public UserTelemetrics getTelemetrics();
+
+    public String getMediaType();
 }
