@@ -1,4 +1,7 @@
-package com.example.marvel.fast_potato;
+package com.example.marvel.fast_potato.knowledge;
+
+import com.example.marvel.fast_potato.telemetrics.UserInteractionTelemetry;
+import com.example.marvel.fast_potato.telemetrics.UserTelemetrics;
 
 /**
  * Created by Sriduth_2 on 22-12-2014.

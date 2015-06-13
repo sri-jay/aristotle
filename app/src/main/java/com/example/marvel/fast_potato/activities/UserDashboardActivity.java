@@ -1,4 +1,4 @@
-package com.example.marvel.fast_potato;
+package com.example.marvel.fast_potato.activities;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -11,6 +11,10 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.TextView;
+
+import com.example.marvel.fast_potato.database.EulerDB;
+import com.example.marvel.fast_potato.knowledge.Knowledge;
+import com.example.marvel.fast_potato.R;
 
 import java.util.Map;
 
@@ -81,7 +85,7 @@ public class UserDashboardActivity extends Activity {
     }
 
     void openRegistrationDash() {
-        Intent intent = new Intent(getApplicationContext(), RegisterCourse.class);
+        Intent intent = new Intent(getApplicationContext(), RegisterCourseActivity.class);
         startActivity(intent);
     }
 

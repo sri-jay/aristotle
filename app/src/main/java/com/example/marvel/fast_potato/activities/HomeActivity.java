@@ -1,4 +1,4 @@
-package com.example.marvel.fast_potato;
+package com.example.marvel.fast_potato.activities;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -12,6 +12,8 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.TextView;
+
+import com.example.marvel.fast_potato.R;
 
 import java.io.File;
 

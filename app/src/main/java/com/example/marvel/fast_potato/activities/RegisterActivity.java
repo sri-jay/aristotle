@@ -1,9 +1,10 @@
-package com.example.marvel.fast_potato;
+package com.example.marvel.fast_potato.activities;
 
 import android.app.Activity;
 import android.content.Context;
 import android.os.Bundle;
 import android.telephony.TelephonyManager;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -13,6 +14,9 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Spinner;
+
+import com.example.marvel.fast_potato.R;
+import com.example.marvel.fast_potato.RegisterUserDevice;
 
 import java.util.ArrayList;
 import java.util.List;

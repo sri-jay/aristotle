@@ -1,4 +1,4 @@
-package com.example.marvel.fast_potato;
+package com.example.marvel.fast_potato.activities;
 
 import android.app.Activity;
 import android.content.Context;
@@ -15,8 +15,11 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import com.example.marvel.fast_potato.knowledge.KnowledgeApi;
+import com.example.marvel.fast_potato.R;
 
-public class RegisterCourse extends Activity {
+
+public class RegisterCourseActivity extends Activity {
 
     private TextView regAdvert = null;
     private ListView courseList = null;
@@ -67,7 +70,7 @@ public class RegisterCourse extends Activity {
         return super.onOptionsItemSelected(item);
     }
 
-    void loadCourses(RegisterCourse activity, String[] data) {
+    public void loadCourses(RegisterCourseActivity activity, String[] data) {
         courseList.setAdapter(new CourseListAdapter(activity.getApplicationContext(), data));
     }
 

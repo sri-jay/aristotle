@@ -1,4 +1,4 @@
-package com.example.marvel.fast_potato;
+package com.example.marvel.fast_potato.activities;
 
 import android.app.Activity;
 import android.app.Dialog;
@@ -26,6 +26,11 @@ import android.widget.RadioGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.VideoView;
+
+import com.example.marvel.fast_potato.knowledge.Knowledge;
+import com.example.marvel.fast_potato.knowledge.KnowledgeApi;
+import com.example.marvel.fast_potato.knowledge.KnowledgeTypes;
+import com.example.marvel.fast_potato.R;
 
 public class LearningActivity extends Activity {
     private View[] views = null;

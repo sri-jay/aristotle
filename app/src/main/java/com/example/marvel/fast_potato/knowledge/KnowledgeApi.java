@@ -1,19 +1,28 @@
-package com.example.marvel.fast_potato;
+package com.example.marvel.fast_potato.knowledge;
 
 import android.app.ProgressDialog;
 import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
 import android.util.Log;
 
+import com.example.marvel.fast_potato.activities.LearningActivity;
+import com.example.marvel.fast_potato.activities.RegisterCourseActivity;
+import com.example.marvel.fast_potato.database.EulerDB;
+
 import org.apache.http.NameValuePair;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.message.BasicHeader;
 import org.apache.http.message.BasicNameValuePair;
+import org.apache.http.protocol.HTTP;
 import org.apache.http.util.EntityUtils;
+import org.joda.time.DateTime;
 import org.json.JSONObject;
 
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -29,16 +38,16 @@ import java.util.Map;
 //  * One to submit information to the api.
 //
 public class KnowledgeApi {
-    static class GetKnowledge extends AsyncTask<String, String, Knowledge> {
+    public static class GetKnowledge extends AsyncTask<String, String, Knowledge> {
 
         private ProgressDialog pd = null;
         private LearningActivity activityContext = null;
 
-        private final String apiUrl = "https://droid-api-staging.herokuapp.com/getNextItemInPath";
+        private final String apiUrl = "http://localhost:8080/aristotle/v1/data/getNextItemInPath";
 
         private boolean save = false;
 
-        GetKnowledge(LearningActivity callerActivityContext, boolean chainWIthSave) {
+        public GetKnowledge(LearningActivity callerActivityContext, boolean chainWIthSave) {
             activityContext = (LearningActivity) callerActivityContext;
             pd = new ProgressDialog(callerActivityContext);
             pd.setCanceledOnTouchOutside(false);
@@ -55,46 +64,52 @@ public class KnowledgeApi {
         protected Knowledge doInBackground(String... string) {
 
             publishProgress("Starting download.");
+
+            Knowledge knowledge = null;
             HttpClient myDevice = new DefaultHttpClient();
             HttpPost request = new HttpPost(apiUrl);
 
-            List<NameValuePair> postData = new ArrayList<NameValuePair>();
-
             Map<String, String[]> deviceData = new EulerDB(activityContext).getUserData();
-            postData.add(new BasicNameValuePair("DEVICE_ID", deviceData.get("keyData")[1]));
-            postData.add(new BasicNameValuePair("COURSE_ID", "GK214"));
-            Knowledge knowledge = null;
+            JSONObject payload = new JSONObject();
+
             try {
-                request.setEntity(new UrlEncodedFormEntity(postData, "UTF-8"));
+                payload.put("deviceId", deviceData.get("keyData")[1]);
+                payload.put("courseId", "GK214");
+
+                StringEntity se = new StringEntity(payload.toString());
+                se.setContentType(new BasicHeader(HTTP.CONTENT_TYPE, "application/json"));
+                request.setEntity(se);
+
                 publishProgress("Downloading...");
                 String jsonData = EntityUtils.toString(myDevice.execute(request).getEntity());
 
                 Log.d("JSON DATA : ", jsonData);
                 JSONObject json = new JSONObject(jsonData);
                 publishProgress("Finished Download");
-                String id = json.getString("ID");
-                String progress = json.getString("PATH_PROGRESS");
+                json = json.getJSONObject("payload");
+                String id = json.getString("id");
+                String progress = "12";
 
 
-                if (json.getString("TYPE").equals(KnowledgeTypes.KNOWLEDGE_TYPE_QUESTION)) {
-                    String statement = json.getString("STATEMENT");
-                    String[] qoptions = {json.getString("OPTION_A"), json.getString("OPTION_B"), json.getString("OPTION_C")};
-                    if(json.getString("MEDIA_TYPE").equals("image"))
-                        knowledge = new QuestionUnit(id, statement, null, qoptions, progress, BitmapFactory.decodeStream(new java.net.URL(json.getString("MEDIA_URL")).openStream()), "image");
+                if (json.getString("type").equals(KnowledgeTypes.KNOWLEDGE_TYPE_QUESTION)) {
+                    String statement = json.getString("statement");
+                    String[] qoptions = {json.getString("optionA"), json.getString("optionB"), json.getString("optionC")};
+                    if(json.getString("mediaType").equals("image"))
+                        knowledge = new QuestionUnit(id, statement, null, qoptions, progress, BitmapFactory.decodeStream(new java.net.URL(json.getString("mediaUrl")).openStream()), "image");
                     else
-                        knowledge = new QuestionUnit(id, statement, null, qoptions, progress, json.getString("MEDIA_URL"), "video");
+                        knowledge = new QuestionUnit(id, statement, null, qoptions, progress, json.getString("mediaUrl"), "video");
                 }
 
-                else if (json.getString("TYPE").equals(KnowledgeTypes.KNOWLEDGE_TYPE_UNIT)) {
-                    String title = json.getString("TITLE");
-                    String content = json.getString("CONTENT");
-                    if(json.getString("MEDIA_TYPE").equals("image"))
-                        knowledge = new KnowledgeUnit(id, content, title, progress, BitmapFactory.decodeStream(new java.net.URL(json.getString("MEDIA_URL")).openStream()), "image");
+                else if (json.getString("type").equals(KnowledgeTypes.KNOWLEDGE_TYPE_UNIT)) {
+                    String title = json.getString("title");
+                    String content = json.getString("content");
+                    if(json.getString("mediaType").equals("image"))
+                        knowledge = new KnowledgeUnit(id, content, title, progress, BitmapFactory.decodeStream(new java.net.URL(json.getString("mediaUrl")).openStream()), "image");
                     else
-                        knowledge = new KnowledgeUnit(id, content, title, progress, json.get("MEDIA_URL"), "video");
+                        knowledge = new KnowledgeUnit(id, content, title, progress, json.get("mediaUrl"), "video");
                 }
 
-                new EulerDB(activityContext).updateSequence(json.getString("SEQUENCE"));
+                new EulerDB(activityContext).updateSequence(json.getString("sequence"));
 
             } catch (Exception e) {
                 e.printStackTrace();
@@ -132,20 +147,20 @@ public class KnowledgeApi {
         }
     }
 
-    static class SaveProgress extends AsyncTask<String, String, String> {
+    public static class SaveProgress extends AsyncTask<String, String, String> {
 
-        private final String apiUrl = "https://droid-api-staging.herokuapp.com/recordResponse";
+        private final String apiUrl = "http://localhost:8080/aristotle/v1/data/recordResponse";
 
         private ProgressDialog pd = null;
         private LearningActivity activityContext = null;
 
         private Knowledge knowledge = null;
 
-        SaveProgress(LearningActivity activity) {
+        public SaveProgress(LearningActivity activity) {
             activityContext = activity;
             knowledge = activityContext.knowledge;
             pd = new ProgressDialog(activityContext);
-            pd.setCanceledOnTouchOutside(false);
+            pd.setCanceledOnTouchOutside(true);
         }
 
         @Override
@@ -160,19 +175,25 @@ public class KnowledgeApi {
             HttpClient client = new DefaultHttpClient();
             HttpPost post = new HttpPost(apiUrl);
 
-            List<NameValuePair> postData = new ArrayList<NameValuePair>();
             Map<String, String[]> deviceData = new EulerDB(activityContext).getUserData();
 
-            postData.add(new BasicNameValuePair("RESPONSE_FOR", knowledge.getKnowledgeType()));
-            postData.add(new BasicNameValuePair("DEVICE_ID", deviceData.get("keyData")[1]));
-            postData.add(new BasicNameValuePair("COURSE_ID", "GK214"));
-            postData.add(new BasicNameValuePair("RESPONSE", strings[0]));
-            postData.add(new BasicNameValuePair("SEQUENCE", new EulerDB(activityContext).getSequence()));
-            postData.add(new BasicNameValuePair("DURATION", knowledge.getTelemetrics().getDuration()));
-
+            JSONObject payload = new JSONObject();
             try {
-                post.setEntity(new UrlEncodedFormEntity(postData, "UTF-8"));
-                client.execute(post).getEntity();
+                payload.put("responseFor", knowledge.getKnowledgeType());
+                payload.put("id", knowledge.getUniqueHash());
+                payload.put("deviceId", deviceData.get("keyData")[1]);
+                payload.put("courseId", "GK214");
+                payload.put("response", strings[0]);
+                payload.put("sequence", new EulerDB(activityContext).getSequence());
+                payload.put("timestamp", new DateTime().toString());
+
+                StringEntity se = new StringEntity(payload.toString());
+                se.setContentType(new BasicHeader(HTTP.CONTENT_TYPE, "application/json"));
+
+                post.setEntity(se);
+                String i = EntityUtils.toString(client.execute(post).getEntity());
+
+                System.out.println(i);
             }
             catch (Exception e){
                 e.printStackTrace();
@@ -189,13 +210,13 @@ public class KnowledgeApi {
         }
     }
 
-    static class GetAllCourses extends AsyncTask<String, String, String[]>{
-        private final String apiUrl = "https://droid-api-staging.herokuapp.com/getAllCourses";
+    public static class GetAllCourses extends AsyncTask<String, String, String[]>{
+        private final String apiUrl = "http://localhost:8080/aristotle/v1/data/getAllCourses";
         private ProgressDialog pd = null;
 
-        private RegisterCourse activity = null;
+        private RegisterCourseActivity activity = null;
 
-        GetAllCourses(RegisterCourse caller){
+        public GetAllCourses(RegisterCourseActivity caller){
             activity =  caller;
             pd = new ProgressDialog(activity);
             pd.setCanceledOnTouchOutside(false);
@@ -215,7 +236,7 @@ public class KnowledgeApi {
 
             Map<String, String[]> deviceData = new EulerDB(activity).getUserData();
             List<NameValuePair> postData = new ArrayList<NameValuePair>();
-            postData.add(new BasicNameValuePair("DEVICE_KEY", deviceData.get("keyData")[1]));
+            postData.add(new BasicNameValuePair("deviceId", deviceData.get("keyData")[1]));
 
             String[] data = null;
 

@@ -14,7 +14,7 @@
         android:label="@string/app_name"
         android:theme="@style/AppTheme" >
         <activity
-            android:name=".HomeActivity"
+            android:name=".activities.HomeActivity"
             android:label="@string/app_name" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -23,7 +23,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".UserDashboardActivity"
+            android:name=".activities.UserDashboardActivity"
             android:label="@string/title_activity_user_dashboard" >
         </activity>
         <activity
@@ -31,7 +31,7 @@
             android:label="@string/title_activity_initial_user_interaction" >
         </activity>
         <activity
-            android:name=".LearningActivity"
+            android:name=".activities.LearningActivity"
             android:label="@string/title_activity_quiz"
             android:screenOrientation="portrait" >
         </activity>
@@ -40,11 +40,11 @@
             android:label="@string/title_activity_quiz_loader" >
         </activity>
         <activity
-            android:name=".RegisterActivity"
+            android:name=".activities.RegisterActivity"
             android:label="@string/title_activity_register" >
         </activity>
         <activity
-            android:name=".RegisterCourse"
+            android:name=".activities.RegisterCourseActivity"
             android:label="@string/title_activity_register_course" >
         </activity>
     </application>

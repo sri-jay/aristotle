@@ -1,4 +1,4 @@
-package com.example.marvel.fast_potato;
+package com.example.marvel.fast_potato.telemetrics;
 
 import org.joda.time.DateTime;
 import org.joda.time.Seconds;
@@ -7,7 +7,7 @@ import org.joda.time.Seconds;
  * Created by Sriduth_2 on 23-12-2014.
  */
 public class UserInteractionTelemetry {
-   static class InformationTelemetry implements  UserTelemetrics {
+   public static class InformationTelemetry implements  UserTelemetrics {
         private DateTime startTime = null;
         private String interval = null;
 
@@ -24,7 +24,7 @@ public class UserInteractionTelemetry {
         }
    }
 
-    static class QuestionTelemetry implements  UserTelemetrics {
+    public static class QuestionTelemetry implements  UserTelemetrics {
         private DateTime startTime = null;
         private String interval = null;
 
@@ -41,7 +41,7 @@ public class UserInteractionTelemetry {
         }
     }
 
-    static class ActivityTelemetry implements UserTelemetrics {
+    public static class ActivityTelemetry implements UserTelemetrics {
         private DateTime startTime = null;
         private String interval = null;
 

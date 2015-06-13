@@ -1,4 +1,4 @@
-package com.example.marvel.fast_potato;
+package com.example.marvel.fast_potato.database;
 
 import android.content.Context;
 import android.database.Cursor;

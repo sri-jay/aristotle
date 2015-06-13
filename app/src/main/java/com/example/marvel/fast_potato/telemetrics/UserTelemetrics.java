@@ -1,4 +1,4 @@
-package com.example.marvel.fast_potato;
+package com.example.marvel.fast_potato.telemetrics;
 
 /**
  * Created by Sriduth_2 on 04-01-2015.

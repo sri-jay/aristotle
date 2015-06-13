@@ -6,20 +6,22 @@ import android.content.Intent;
 import android.os.AsyncTask;
 import android.util.Log;
 
-import org.apache.http.NameValuePair;
+import com.example.marvel.fast_potato.activities.UserDashboardActivity;
+import com.example.marvel.fast_potato.database.EulerDB;
+
 import org.apache.http.client.HttpClient;
-import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.message.BasicNameValuePair;
+import org.apache.http.message.BasicHeader;
+import org.apache.http.protocol.HTTP;
 import org.apache.http.util.EntityUtils;
+import org.json.JSONArray;
 import org.json.JSONObject;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.UUID;
@@ -29,11 +31,10 @@ import java.util.UUID;
  * This class provides functions to register the user.
  */
 public class RegisterUserDevice {
-    public static final String REGISTER_SUCCESS = "REGISTRATION_SUCCEEDED";
 
-    static class GetOrganizations extends AsyncTask<String, String , Map<String, String> > {
+    public static class GetOrganizations extends AsyncTask<String, String , Map<String, String> > {
 
-        private final String apiUrl = "https://droid-api.herokuapp.com/getAllOrg";
+        private final String apiUrl = "http://localhost:8080/aristotle/v1/data/getAllOrg";
         @Override
         protected Map<String, String> doInBackground(String... strings) {
             HttpClient thisDevice = new DefaultHttpClient();
@@ -44,12 +45,12 @@ public class RegisterUserDevice {
             try {
                 String jsonAsString = EntityUtils.toString(thisDevice.execute(req).getEntity());
                 JSONObject jsonData = new JSONObject(jsonAsString);
-
+                JSONArray org = jsonData.getJSONArray("payload");
                 Iterator it = jsonData.keys();
 
-                while(it.hasNext()){
-                    String key = (String) it.next();
-                    data.put(jsonData.getString(key), key);
+                for(int i=0;i<org.length();i++) {
+                    JSONObject ob = org.getJSONObject(i);
+                    data.put(ob.getString("clientName"), ob.getString("clientId"));
                 }
             }
 
@@ -60,13 +61,13 @@ public class RegisterUserDevice {
         }
     }
 
-    static class RegisterDevice extends AsyncTask<String, String, Map<String, String> > {
+    public static class RegisterDevice extends AsyncTask<String, String, Map<String, String> > {
 
-        private final String registerApiUrl = "https://droid-api.herokuapp.com/registerDevice";
+        private final String registerApiUrl = "http://localhost:8080/aristotle/v1/data/registerDevice";
         private Activity callerActivity = null;
         private ProgressDialog pd = null;
 
-        RegisterDevice(Activity caller){
+        public RegisterDevice(Activity caller){
             callerActivity = caller;
             pd = new ProgressDialog(callerActivity);
             pd.setCanceledOnTouchOutside(false);
@@ -86,32 +87,29 @@ public class RegisterUserDevice {
 
             HttpClient myDevice = new DefaultHttpClient();
             HttpPost request = new HttpPost(registerApiUrl);
-
-            List<NameValuePair> postData = new ArrayList<NameValuePair>();
+            JSONObject payload = new JSONObject();
             String uniqueHash = UUID.randomUUID().toString();
 
-            Log.d("--reg", data[0]);
-            Log.d("--reg", data[1]);
-            Log.d("--reg", data[2]);
-
-            postData.add(new BasicNameValuePair("DEVICE_ID", uniqueHash));
-            postData.add(new BasicNameValuePair("CLIENT_ID", data[0]));
-            postData.add(new BasicNameValuePair("F_NAME", data[1]));
-            postData.add(new BasicNameValuePair("L_NAME", data[2]));
-            postData.add(new BasicNameValuePair("PHONE_NUMBER", data[3]));
-
             try {
-                request.setEntity(new UrlEncodedFormEntity(postData, "UTF-8"));
+                payload.put("deviceCode", uniqueHash);
+                payload.put("clientId", data[0]);
+                payload.put("firstName", data[1]);
+                payload.put("lastName", data[2]);
+                payload.put("phoneNumber", data[3]);
+
+                StringEntity se = new StringEntity(payload.toString());
+                se.setContentType(new BasicHeader(HTTP.CONTENT_TYPE, "application/json"));
+                request.setEntity(se);
                 String jsonAsString = EntityUtils.toString(myDevice.execute(request).getEntity());
 
                 JSONObject jsonData = new JSONObject(jsonAsString);
 
-                regData.put("STATUS", jsonData.getString("STATUS"));
-                regData.put("API_KEY", jsonData.getString("API_SECRET"));
-                regData.put("USER_ID", uniqueHash);
-                regData.put("CLIENT_ID", data[0]);
-                regData.put("FIRST_NAME", data[1]);
-                regData.put("LAST_NAME", data[2]);
+                regData.put("status", jsonData.getString("status"));
+                regData.put("apiKey", jsonData.getString("payload"));
+                regData.put("userId", uniqueHash);
+                regData.put("clientId", data[0]);
+                regData.put("firstName", data[1]);
+                regData.put("lastName", data[2]);
 
             } catch (Exception e) {
                 e.printStackTrace();
@@ -126,9 +124,9 @@ public class RegisterUserDevice {
 
             pd.dismiss();
 
-            if(regData.get("STATUS").equals(RegisterUserDevice.REGISTER_SUCCESS)) {
-                createLocalDatabase(regData.get("API_KEY"), regData.get("USER_ID"), regData.get("CLIENT_ID"));
-                saveUserData(regData.get("FIRST_NAME"), regData.get("LAST_NAME"));
+            if(regData.get("status").equals("ok")) {
+                createLocalDatabase(regData.get("apiKey"), regData.get("userId"), regData.get("clientId"));
+                saveUserData(regData.get("firstName"), regData.get("lastName"));
 
                 Intent intent = new Intent(callerActivity, UserDashboardActivity.class);
 
